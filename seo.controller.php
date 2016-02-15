@@ -20,7 +20,7 @@ class seoController extends seo
 
 		if ($config->use_optimize_title == 'Y') {
 			$title = array();
-			if ($piece['[:document_title:]'] && !$is_index) {
+			if ($piece['[:document_title:]']) {
 				$title[] = $piece['[:document_title:]'];
 				$title[] = $piece['[:module_title:]'];
 				$title[] = $piece['[:site_name:]'];
@@ -63,7 +63,6 @@ class seoController extends seo
 		);
 
 		$oModuleModel = getModel('module');
-		$oModuleController = getController('module');
 		$config = $this->getConfig();
 
 		$logged_info = Context::get('logged_info');
@@ -73,32 +72,13 @@ class seoController extends seo
 		$is_article = false;
 		$single_image = false;
 		$is_index = ($current_module_info->module_srl == $site_module_info->module_srl) ? true : false;
-		
-		$args = new stdClass();
-		$args->url = $current_module_info->mid;
-		$args->site_srl = $site_module_info->site_srl;
-		$args->is_shortcut = 'N';
-		$output = executeQuery('menu.getMenuItemByUrl', $args);
-		
+
 		$piece = new stdClass;
 		$piece->document_title = null;
 		$piece->type = 'website';
 		$piece->url = getFullUrl('');
 		$piece->title = Context::getBrowserTitle();
-		//$piece->description = $config->site_description;
-		if(!$output->data) {
-			$output->data = new stdClass();
-			$output->data->desc = '';
-		}
-		
- 		$desc = explode('|', $output->data->desc);
-		
- 		if($config->use_menu_desc === 'Y' && $desc[0]!='') {
-			$oModuleController->replaceDefinedLangCode($desc[0],TRUE);
-			$piece->description = htmlspecialchars($desc[0], ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
-		}
- 		else $piece->description = $config->site_description;
-		
+		$piece->description = $config->site_description;
 		$piece->keywords = $config->site_keywords;
 		$piece->tags = array();
 		$piece->image = array();
@@ -215,8 +195,7 @@ class seoController extends seo
 		foreach ($piece->image as $img) {
 			if(!$img['url']) {
 				if(!$img['filepath']) continue;
-				$file_link = str_replace("./files", "files", $img['filepath']);
-				$img['url'] = Context::get('request_uri') . $file_link;
+				$img['url'] = Context::get('request_uri') . $img['filepath'];
 			}
 
 			$this->addMeta('og:image', $img['url']);
