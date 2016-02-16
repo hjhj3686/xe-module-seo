@@ -128,6 +128,7 @@ class seoController extends seo
 				$piece->type = 'article';
 				$piece->description = trim(str_replace('&nbsp;', ' ', $oDocument->getContentText(400)));
 				$piece->author = $oDocument->getNickName();
+				$getThumbnail = $oDocument->getThumbnail(300,300,'');
 				$tags = $oDocument->get('tag_list');
 				if (count($tags)) $piece->tags = $tags;
 
@@ -184,9 +185,17 @@ class seoController extends seo
 		if($oCacheHandler->isSupport()) {
 			$cache_key = 'seo:site_image';
 			$site_image = $oCacheHandler->get($cache_key);
+			$cache_key = 'seo:thumbnail';
+			$thumbnail = $oCacheHandler->get($cache_key);
+			if($getThumbnail && !$piece->image) {
+				$thumbnail['url'] = $getThumbnail;
+				$thumbnail['width'] = 300;
+				$thumbnail['height'] = 300;
+			}
 			if($site_image) {
 				$site_image['url'] = $config->site_image_url;
 			}
+			$piece->image[] = $thumbnail;
 			$piece->image[] = $site_image;
 		}
 
